@@ -33,7 +33,7 @@ public:
         (c == 'A' ||  c == 'C');
     }
 
-    map<char, set<char>> findFirstK(const map<char, vector<string>> &grammar) {
+    map<char, set<char>> findFirst1(const map<char, vector<string>> &grammar) {
         map<char, set<char>> first1;
         bool changesFlag = true;
         while (changesFlag) {
