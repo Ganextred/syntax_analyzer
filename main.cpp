@@ -5,7 +5,31 @@
 
 int main() {
     ControlTable ct;
-    ct.findFirstK(ct.inputGrammar);
-    std::cout << "Hello, World!" << std::endl;
+    auto first1 = ct.findFirst1();
+    auto follow1 = ct.findFollow1();
+
+    for (const auto &entry : first1) {
+        std::cout << "Key: " << entry.first << ", Values: ";
+
+        // Print the set associated with the key
+        for (const auto &value : entry.second) {
+
+            std::cout << value << " ";
+        }
+
+        std::cout << std::endl;
+    }
+    cout<<"Follow1:"<<endl;
+    for (const auto &entry : follow1) {
+        std::cout << "Key: " << entry.first << ", Values: ";
+
+        // Print the set associated with the key
+        for (const auto &value : entry.second) {
+            std::cout << value << " ";
+        }
+
+        std::cout << std::endl;
+    }
+
     return 0;
 }
