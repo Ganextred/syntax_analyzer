@@ -2,7 +2,7 @@
 // Created by User on 12.11.2023.
 //
 
-#ifndef SYNTAX_ANALYZER_CONTROLTABLE_H
+//#ifndef SYNTAX_ANALYZER_CONTROLTABLE_H
 #define SYNTAX_ANALYZER_CONTROLTABLE_H
 
 
@@ -16,22 +16,22 @@ using namespace std;
 
 class ControlTable {
 public:
-//    const map<char, vector<string>> grammar = {
-//            {'S', {"BA"}},
-//            {'A', {"+BA", "e"}},
-//            {'B', {"DC"}},
-//            {'C', {"*DC", "e"}},
-//            {'D', {"(S)", "a"}}
-//    };
-//
     const map<char, vector<string>> grammar = {
-            {'S', {"i+D","(S*R)", "e"}},
-            {'D', {"V*S", "L!S"}},
-            {'R', {"V!S", "L*S"}},
-            {'V', {"Z", "n"}},
-            {'L', {"(S)", "Z"}},
-            {'Z', {"e"}}
+            {'S', {"BA"}},
+            {'A', {"+BA", "e"}},
+            {'B', {"DC"}},
+            {'C', {"*DC", "e"}},
+            {'D', {"(S)", "a"}}
     };
+//
+//    const map<char, vector<string>> grammar = {
+//            {'S', {"i+D", "(S*R)", "e"}},
+//            {'D', {"V*S", "L!S"}},
+//            {'R', {"V!S", "L*S"}},
+//            {'V', {"Z",   "n"}},
+//            {'L', {"(S)", "Z"}},
+//            {'Z', {"e"}}
+//    };
 
     static bool isNotTerminal(char c) {
         return (c >= 'A' && c <= 'Z');
@@ -42,8 +42,8 @@ public:
 //        (c == 'A' ||  c == 'C');
 //    }
     bool isEpsilon(char c) {
-        return isNotTerminal(c)
-        && first1[c].count('e') > 0;
+        return c == 'e' || (isNotTerminal(c)
+               && first1[c].count('e') > 0);
     }
 
 //        bool isEpsilon(char c) {
@@ -66,24 +66,20 @@ public:
                     int i = 0;
                     char currentC;
                     if (value == "Z")
-                        cout<<"";
+                        cout << "";
                     do {
                         currentC = value[i];
                         if (!isNotTerminal(currentC)) {
-                            if (currentC == 0)
-                                cout<<"here1";
                             changesFlag |= first1[key].insert(currentC).second;
                         } else {
                             for (char c: first1[currentC]) {
-                                if (c == 0)
-                                    cout<<"here2";
-                                if(c != 'e')
+                                if (c != 'e')
                                     changesFlag |= first1[key].insert(c).second;
-                                }
+                            }
                         }
                         i++;
-                    } while (isEpsilon(currentC) && i<value.size());
-                    if (isEpsilon(value[i-1]) && i == value.size()){
+                    } while (isEpsilon(currentC) && i < value.size());
+                    if (isEpsilon(value[i - 1]) && i == value.size()) {
                         changesFlag |= first1[key].insert('e').second;
                     }
                 }
@@ -91,6 +87,7 @@ public:
         }
         return first1;
     }
+
     map<char, set<char>> follow1;
 
     map<char, set<char>> findFollow1() {
@@ -114,18 +111,18 @@ public:
                                     for (char c: follow1[key])
                                         changesFlag |= follow1[cToUpdate].insert(c).second;
                                 } else {
-                                    int j = i+1;
-                                    do{
+                                    int j = i + 1;
+                                    do {
                                         if (!isNotTerminal(value[j]))
                                             changesFlag |= follow1[cToUpdate].insert(value[j]).second;
-                                        else{
+                                        else {
                                             for (char c: first1[value[j]])
                                                 if (c != 'e')
                                                     changesFlag |= follow1[cToUpdate].insert(c).second;
                                         }
                                         j++;
-                                    }while (isEpsilon(value[j-1]) && j<value.size());
-                                    if (isEpsilon(value[j-1]) && j == value.size()){
+                                    } while (isEpsilon(value[j - 1]) && j < value.size());
+                                    if (isEpsilon(value[j - 1]) && j == value.size()) {
                                         for (char c: follow1[key])
                                             changesFlag |= follow1[cToUpdate].insert(c).second;
                                     }
@@ -139,7 +136,38 @@ public:
         return follow1;
     };
 
+    map<pair<char, char>, int> create_table() {
+        map<pair<char, char>, int> table;
+
+        for (const auto &it: grammar) {
+            char key = it.first;
+            const vector<string> &values = it.second;
+
+            for (int i = 0; i< values.size(); i++) {
+                string value = values[i];
+                //set<char> chars_for_rule;
+                int j = 0;
+                do {
+                    if (!isNotTerminal(value[j])  && value[j] != 'e')
+                        //chars_for_rule.insert(value[j]);
+                        table[ pair<char, int>(value[j], key)] = i;
+                    else {
+                        for (char c: first1[value[j]])
+                            if (c != 'e')
+                                //chars_for_rule.insert(c);
+                                table[pair<char, int>(c, key)] = i;
+                    }
+                    j++;
+                } while (isEpsilon(value[j - 1]) && j < value.size());
+                if (isEpsilon(value[j - 1]) && j == value.size()) {
+                    for (char c: follow1[key])
+                        //chars_for_rule.insert(c);
+                        table[pair<char, int>(c, key)] = i;
+                }
+            }
+        }
+
+        return table;
+    }
+
 };
-
-
-#endif //SYNTAX_ANALYZER_CONTROLTABLE_H
