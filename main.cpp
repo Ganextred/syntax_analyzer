@@ -37,5 +37,7 @@ int main() {
         std::cout << "Key: " << entry.first.first << ", Value: (" << entry.first.second << "->" << ct.grammar.at(entry.first.second)[entry.second] << ")\n";
     }
 
+    ct.analyzeInput("(a+a)*a!");
+
     return 0;
 }

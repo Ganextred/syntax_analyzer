@@ -11,6 +11,7 @@
 #include <map>
 #include <set>
 #include <iostream>
+#include <stack>
 
 using namespace std;
 
@@ -136,8 +137,9 @@ public:
         return follow1;
     };
 
+    map<pair<char, char>, int> table;
     map<pair<char, char>, int> create_table() {
-        map<pair<char, char>, int> table;
+
 
         for (const auto &it: grammar) {
             char key = it.first;
@@ -168,6 +170,47 @@ public:
         }
 
         return table;
+    }
+
+    void analyzeInput(string input) {
+
+        int i = 0;
+        bool error = false;
+        stack<char> stack;
+        stack.push('S');
+        cout << endl << endl << "Rules sequence:" << endl << endl;
+        while (!stack.empty() && !error) {
+            char inputc;
+            if (i<input.size())
+                inputc = input[i];
+            else
+                inputc = 'e';
+            if (!isNotTerminal(stack.top())) {
+                if (stack.top() == 'e') {
+                    stack.pop();
+                } else if (stack.top() == inputc) {
+                    stack.pop();
+                    i++;
+                } else {
+                    error = true;
+                }
+            } else {
+                if (table.count(pair<char,char>(inputc,stack.top())) > 0) {
+                    char key = stack.top();
+                    string rule = grammar.at(key)[table[pair<char,char>(inputc,key)]];
+                    stack.pop();
+                    for (int itr = rule.size()-1; itr>=0;  itr--)
+                        stack.push(rule[itr]);
+                    cout << "Rule " << key << "->" <<rule << endl;
+                } else {
+                    error = true;
+                }
+            }
+        }
+
+        if (error) {
+            cout << "Error at index:"<<i << endl;
+        }
     }
 
 };
